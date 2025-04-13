@@ -184,7 +184,7 @@
                         {{ tag }}
                     </span>
                 {% else %}
-                    <!-- {{ tag }}: {{ score }} -->
+                    <!-- {{ tag }}: {{ score | round(1) }} -->
                 {% endif %}
             {% endfor %}
         </div>
