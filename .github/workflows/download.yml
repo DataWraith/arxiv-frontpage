@@ -23,8 +23,8 @@ jobs:
         run: uv run src/download.py
       - name: Commit and push
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "ArXiv Frontpage Action"
+          git config user.email "3884+DataWraith@users.noreply.github.com"
           git add -A
           timestamp=$(date -u)
           git commit -m "Update Arxiv RSS feed at $timestamp" || exit 0
