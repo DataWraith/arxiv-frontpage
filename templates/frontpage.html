@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArXiv Papers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .paper {
+            margin-bottom: 30px;
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .paper-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .paper-meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .paper-abstract {
+            margin-bottom: 10px;
+        }
+        .abstract-short {
+            display: inline;
+        }
+        .abstract-full {
+            display: none;
+        }
+        .more-link {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .tag-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            color: white;
+        }
+        .tag-badge.high-confidence {
+            opacity: 1;
+        }
+        .tag-badge.low-confidence {
+            opacity: 0.6;
+            display: none;
+        }
+        .interestingness-score {
+            display: inline-block;
+            padding: 3px 8px;
+            margin-right: 10px;
+            color: white;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .interestingness-positive {
+            background-color: #4CAF50;
+        }
+        .interestingness-negative {
+            background-color: #f44336;
+        }
+        .last-updated {
+            text-align: right;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .intro {
+            text-align: center;
+            max-width: 60em;
+            margin: 0 auto;
+            color: #888;
+        }
+        .copy-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'%3E%3C/path%3E%3C/svg%3E");
+            background-size: contain;
+            cursor: pointer;
+            margin-left: 5px;
+            opacity: 0.5;
+        }
+        .copy-icon:hover {
+            opacity: 1;
+        }
+        .json-popup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 500px;
+            max-height: 300px;
+            overflow: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            text-align: center;
+        }
+        h1 a {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <a href="https://github.com/DataWraith/arxiv-frontpage">DataWraith's</a> ArXiv Frontpage
+    </h1>
+
+    <div class="last-updated">
+        Last updated: {{ last_updated }}
+    </div>
+
+    <p class="intro">
+        This frontpage is made by scraping ArXiv's computer science RSS feed and tagging papers with a classifier.
+    </p>
+
+    <p class="intro">
+        Each tag is weighted according to my preferences to compute a paper's <i>interestingness</i> score.
+    </p>
+    
+    <script>
+        // Store paper data in an array
+        const papers = [
+            {% for paper in papers %}
+                {{ paper|tojson }},
+            {% endfor %}
+        ];
+    </script>
+
+    {% for paper in papers %}
+    <div class="paper">
+        <div class="paper-title">
+            <span class="interestingness-score {% if paper.interestingness_score >= 0 %}interestingness-positive{% else %}interestingness-negative{% endif %}">
+                {{ paper.interestingness_score|abs if paper.interestingness_score == -0.0 else paper.interestingness_score }}
+            </span>
+            <a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">{{ paper.title }}</a>
+            <span class="copy-icon" onclick="event.stopPropagation(); showJson(papers[{{ loop.index0 }}])"></span>
+        </div>
+        <div class="paper-meta">
+            Authors: {{ paper.authors|join(", ") }} | Date: {{ paper.date }}
+        </div>
+        <div class="paper-abstract">
+            <span class="abstract-short">{{ paper.abstract[:300] }}</span>
+            {% if paper.abstract|length > 300 %}
+            <span class="abstract-full" style="display: none;">{{ paper.abstract }}</span>
+            <span class="more-link" onclick="toggleAbstract(this)">... more</span>
+            {% endif %}
+        </div>
+        <div class="paper-tags">
+            {% for tag, score in paper.tag_scores.items()|sort(attribute='1', reverse=true) %}
+                {% if score >= 75 %}
+                    <span class="tag-badge high-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
+                        {{ tag }}
+                    </span>
+                {% elif score >= 50 %}
+                    <span class="tag-badge low-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
+                        {{ tag }}
+                    </span>
+                {% else %}
+                    <!-- {{ tag }}: {{ score }} -->
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    
+    <div id="jsonPopup" class="json-popup">
+        <pre id="jsonContent"></pre>
+        <button onclick="copyJson()">Copy to Clipboard</button>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
+    <script>
+        function toggleAbstract(element) {
+            const abstract = element.parentElement;
+            const short = abstract.querySelector('.abstract-short');
+            const full = abstract.querySelector('.abstract-full');
+            const lowConfidenceTags = abstract.parentElement.querySelectorAll('.tag-badge.low-confidence');
+            
+            if (element.textContent === '... more') {
+                short.style.display = 'none';
+                full.style.display = 'inline';
+                element.textContent = ' less';
+                lowConfidenceTags.forEach(tag => tag.style.display = 'inline-block');
+            } else {
+                short.style.display = 'inline';
+                full.style.display = 'none';
+                element.textContent = '... more';
+                lowConfidenceTags.forEach(tag => tag.style.display = 'none');
+            }
+        }
+
+        function showJson(paper) {
+            const popup = document.getElementById('jsonPopup');
+            const content = document.getElementById('jsonContent');
+            // Create a copy of the paper object without the scores keys
+            const paperWithoutScores = {...paper};
+            delete paperWithoutScores.tag_scores;
+            delete paperWithoutScores.interestingness_score;
+            content.textContent = JSON.stringify(paperWithoutScores, null, null);
+            popup.style.display = 'block';
+            document.addEventListener('click', function closePopupOnClick(event) {
+                if (!popup.contains(event.target)) {
+                    popup.style.display = 'none';
+                    document.removeEventListener('click', closePopupOnClick);
+                }
+            });
+        }
+
+        function closePopup() {
+            document.getElementById('jsonPopup').style.display = 'none';
+        }
+
+        function copyJson() {
+            const content = document.getElementById('jsonContent').textContent;
+            navigator.clipboard.writeText(content).catch(() => {
+                // If clipboard API is not available, just show the popup
+                alert('Could not copy to clipboard. JSON is displayed in the popup.');
+            });
+        }
+
+        // Close popup when clicking outside
+        window.onclick = function(event) {
+            const popup = document.getElementById('jsonPopup');
+            if (event.target === popup) {
+                popup.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 
