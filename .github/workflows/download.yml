@@ -1,0 +1,31 @@
+name: Parse Arxiv RSS Feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 6 * * 1-5" # Arxiv RSS feed doesn't update on weekends
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/uv@v5
+        with:
+          version: "0.6.14"
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Download Arxiv RSS Feed
+        run: uv run src/download.py
+      - name: Commit and push
+        run: |
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          timestamp=$(date -u)
+          git commit -m "Update Arxiv RSS feed at $timestamp" || exit 0
+          git push
