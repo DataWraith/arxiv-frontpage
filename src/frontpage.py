@@ -133,15 +133,13 @@ def main():
     for jsonl_file in tqdm(jsonl_files, desc="Reading JSONL files"):
         papers.extend(srsly.read_jsonl(jsonl_file))
 
-    os.makedirs("out", exist_ok=True)
-
     html_content = generate_html(
         papers=papers,
         tags=tags,
         classifier=classifier,
     )
 
-    output_file = "out/index.html"
+    output_file = "index.html"
     with open(output_file, "w") as f:
         f.write(html_content)
 

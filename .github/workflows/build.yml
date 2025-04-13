@@ -1,0 +1,33 @@
+name: Build ArXiv Frontpage
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "25 6 * * 1-5" # Arxiv RSS feed doesn't update on weekends
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.14"
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Train model
+        run: uv run src/train.py
+      - name: Build frontpage
+        run: uv run src/frontpage.py
+      - name: Commit and push
+        run: |
+          git config user.name "ArXiv Frontpage Action"
+          git config user.email "3884+DataWraith@users.noreply.github.com"
+          git add -A
+          timestamp=$(date -u)
+          git commit -m "Update ArXiv Frontpage at $timestamp" || exit 0
+          git push
