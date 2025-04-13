@@ -9,6 +9,7 @@ import srsly
 from jinja2 import Environment, FileSystemLoader
 from napkinxc.models import PLT
 from tqdm import tqdm
+import numpy as np
 
 from tagger.osb import bigram_indices, wrap_indices
 from tagger.plt_classifier import VECTOR_SIZE, make_classifier
@@ -93,6 +94,55 @@ def get_tag_color(tag: str) -> str:
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
+def select_papers(papers: List[Dict], target_count: int = 300) -> List[Dict]:
+    """Select papers according to a mixed strategy:
+    - Top 25 papers by interestingness score
+    - Bottom 25 papers by interestingness score
+    - 25 papers closest to zero interestingness score
+    - Remaining papers selected with probability proportional to absolute interestingness score
+    """
+    if len(papers) <= target_count:
+        return papers
+
+    # Sort papers by interestingness score
+    papers.sort(key=lambda p: -p["interestingness_score"])
+    
+    # Select fixed points
+    top_papers = papers[:25]
+    bottom_papers = papers[-25:]
+    
+    # Find papers closest to zero
+    zero_papers = sorted(papers[25:-25], key=lambda p: abs(p["interestingness_score"]))[:25]
+    
+    # Get remaining papers
+    remaining_papers = [p for p in papers[25:-25] if p not in zero_papers]
+    
+    # Calculate selection probabilities based on absolute interestingness score
+    total_score = sum(abs(p["interestingness_score"]) for p in remaining_papers)
+    if total_score > 0:
+        probs = [abs(p["interestingness_score"]) / total_score for p in remaining_papers]
+    else:
+        probs = [1.0 / len(remaining_papers) for _ in remaining_papers]
+    
+    # Select remaining papers
+    np.random.seed(42)  # For reproducibility
+    selected_indices = np.random.choice(
+        len(remaining_papers),
+        size=target_count - 75,  # 75 = 25 + 25 + 25
+        replace=False,
+        p=probs
+    )
+    selected_remaining = [remaining_papers[i] for i in selected_indices]
+    
+    # Combine all selected papers
+    final_papers = top_papers + selected_remaining + zero_papers + bottom_papers
+    
+    # Sort by interestingness score for final display
+    final_papers.sort(key=lambda p: -p["interestingness_score"])
+    
+    return final_papers
+
+
 def generate_html(
     papers: List[Dict],
     tags: Dict[str, float],
@@ -110,7 +160,8 @@ def generate_html(
         for paper in tqdm(papers, desc="Calculating scores")
     ]
 
-    processed_papers.sort(key=lambda p: -p["interestingness_score"])
+    # Select papers according to our strategy
+    processed_papers = select_papers(processed_papers)
 
     env = Environment(loader=FileSystemLoader("templates"))
     template = env.get_template("frontpage.html")
