@@ -66,7 +66,7 @@ def process_paper_scores(
     return paper
 
 
-def get_recent_papers(papers: List[Dict], days: int = 7) -> List[Dict]:
+def get_recent_papers(papers: List[Dict], days: int = 3) -> List[Dict]:
     """Get papers from the last N days."""
 
     recent_papers = []
