@@ -1,7 +1,7 @@
 [project]
-name = "wm-sketch-py"
+name = "arxiv-frontpage"
 version = "0.1.0"
-description = "Add your description here"
+description = "Fetches computer science papers and makes an HTML page with papers sorted by interestingness"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -15,15 +15,4 @@ dependencies = [
     "srsly>=2.5.1",
     "tqdm>=4.67.1",
     "xxhash>=3.5.0",
-]
-
-[dependency-groups]
-dev = [
-    "pytest>=8.3.5",
-]
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-addopts = [
-    "--import-mode=importlib",
 ]
