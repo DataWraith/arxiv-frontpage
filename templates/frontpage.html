@@ -146,12 +146,39 @@
     </p>
     
     <script>
-        // Store paper data in an array
-        const papers = [
-            {% for paper in papers %}
-                {{ paper|tojson }},
-            {% endfor %}
-        ];
+        function extractPaperData(paperElement) {
+            const titleElement = paperElement.querySelector('.paper-title a');
+            const metaElement = paperElement.querySelector('.paper-meta');
+            const abstractElement = paperElement.querySelector('.paper-abstract');
+            const tagsElement = paperElement.querySelector('.paper-tags');
+            
+            const authorsText = metaElement.textContent.split('|')[0].replace('Authors:', '').trim();
+            const dateText = metaElement.textContent.split('|')[1].replace('Date:', '').trim();
+            
+            const paperData = {
+                title: titleElement.textContent,
+                url: titleElement.href,
+                authors: authorsText.split(',').map(author => author.trim()),
+                created: dateText,
+                abstract: abstractElement.querySelector('.abstract-full').textContent
+            };
+            
+            return paperData;
+        }
+
+        function showJson(paperElement) {
+            const popup = document.getElementById('jsonPopup');
+            const content = document.getElementById('jsonContent');
+            const paperData = extractPaperData(paperElement);
+            content.textContent = JSON.stringify(paperData, null, null);
+            popup.style.display = 'block';
+            document.addEventListener('click', function closePopupOnClick(event) {
+                if (!popup.contains(event.target)) {
+                    popup.style.display = 'none';
+                    document.removeEventListener('click', closePopupOnClick);
+                }
+            });
+        }
     </script>
 
     {% for paper in papers %}
@@ -161,7 +188,7 @@
                 {{ paper.interestingness_score|abs if paper.interestingness_score == -0.0 else paper.interestingness_score }}
             </span>
             <a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">{{ paper.title }}</a>
-            <span class="copy-icon" onclick="event.stopPropagation(); showJson(papers[{{ loop.index0 }}])"></span>
+            <span class="copy-icon" onclick="event.stopPropagation(); showJson(this.closest('.paper'))"></span>
         </div>
         <div class="paper-meta">
             Authors: {{ paper.authors|join(", ") }} | Date: {{ paper.date }}
@@ -215,23 +242,6 @@
                 element.textContent = '... more';
                 lowConfidenceTags.forEach(tag => tag.style.display = 'none');
             }
-        }
-
-        function showJson(paper) {
-            const popup = document.getElementById('jsonPopup');
-            const content = document.getElementById('jsonContent');
-            // Create a copy of the paper object without the scores keys
-            const paperWithoutScores = {...paper};
-            delete paperWithoutScores.tag_scores;
-            delete paperWithoutScores.interestingness_score;
-            content.textContent = JSON.stringify(paperWithoutScores, null, null);
-            popup.style.display = 'block';
-            document.addEventListener('click', function closePopupOnClick(event) {
-                if (!popup.contains(event.target)) {
-                    popup.style.display = 'none';
-                    document.removeEventListener('click', closePopupOnClick);
-                }
-            });
         }
 
         function closePopup() {
