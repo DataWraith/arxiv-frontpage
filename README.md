@@ -21,7 +21,7 @@ The GitHub Actions automatically pull new data and regenerate the site once on e
 1. **Tag Configuration**: Tags are defined in `data/tags.json` and mapped to their interestingness multiplier.
 2. **Training Data**: Each tag must have an associated `.jsonl` file in the `data/train` directory.
 3. **Paper Collection**: The system fetches recent papers from arXiv's CS categories via RSS feed.
-4. **Classification**: A Probabilistic Label Tree classifier (via [napkinXC](https://napkinxc.readthedocs.io) determines the relevance of each tag for each paper.
+4. **Classification**: A Probabilistic Label Tree classifier (via [napkinXC](https://napkinxc.readthedocs.io)) determines the relevance of each tag for each paper.
 5. **Ranking**: Papers are scored and the frontpage is generated.
 
 The generated frontpage includes a copy button that displays the JSON data you need to put into the training files to improve future classifications.
