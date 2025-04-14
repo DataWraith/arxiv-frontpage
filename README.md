@@ -1,6 +1,6 @@
 # arxiv-frontpage
 
-A tool that creates a personalized frontpage of arXiv computer science papers ranked by your interests using GitHub Actions.
+A tool that creates a personalized frontpage of arXiv computer science papers ranked by your interests.
 
 ## Demo
 
