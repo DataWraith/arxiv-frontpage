@@ -14,7 +14,7 @@ Inspired by <https://github.com/koaning/arxiv-frontpage>, this project fetches n
 
 Each tag is associated with an "interestingness" multiplier, and the final frontpage ranks papers by multiplying the confidence that a given tag is present with its interestingness modifier. The resulting score is then summed over all tags, giving you a personalized ranking of fresh papers.
 
-The GitHub Actions automatically pull new data and regenerate the site once on every weekday -- you may need to allow GitHub Actions to commit new changes in the repository settings if you fork the project.
+The GitHub Actions automatically pull new data and regenerate the site once on every weekday -- if you fork the repo, you may need to change the repository settings to allow Actions to commit and push changes. 
 
 ## How does it work?
 
