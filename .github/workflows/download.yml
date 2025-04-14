@@ -3,7 +3,7 @@ name: Parse Arxiv RSS Feed
 on:
   workflow_dispatch:
   schedule:
-    - cron: "11 6 * * 1-5" # Arxiv RSS feed doesn't update on weekends
+    - cron: "11 5 * * 1-5" # Arxiv RSS feed doesn't update on weekends
 
 jobs:
   scheduled:

@@ -3,7 +3,7 @@ name: Build ArXiv Frontpage
 on:
   workflow_dispatch:
   schedule:
-    - cron: "25 6 * * 1-5" # Arxiv RSS feed doesn't update on weekends
+    - cron: "25 5 * * 1-5" # Arxiv RSS feed doesn't update on weekends
 
 jobs:
   build:
