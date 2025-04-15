@@ -10,6 +10,7 @@ dependencies = [
     "napkinxc>=0.7.1",
     "numpy>=2.2.4",
     "pydantic>=2.11.3",
+    "regex>=2024.11.6",
     "retry>=0.9.2",
     "rich>=14.0.0",
     "srsly>=2.5.1",
