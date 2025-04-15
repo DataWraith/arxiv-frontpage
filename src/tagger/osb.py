@@ -1,7 +1,7 @@
 import xxhash
 
 
-def orthogonal_sparse_bigrams(text: str, window_size: int = 5) -> list[str]:
+def orthogonal_sparse_bigrams(text: str, include_unigrams: bool = True, window_size: int = 5) -> list[str]:
     """
     Generate orthogonal sparse bigrams from a string.
 
@@ -17,6 +17,9 @@ def orthogonal_sparse_bigrams(text: str, window_size: int = 5) -> list[str]:
     bigrams = []
 
     for i in range(len(words)):
+        if include_unigrams:
+            bigrams.append(words[i])
+
         for j in range(1, min(window_size, len(words) - i)):
             bigram = f"{words[i]} {'*' * (j-1)} {words[i+j]}"
             bigrams.append(bigram)
