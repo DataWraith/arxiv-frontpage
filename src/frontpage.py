@@ -94,7 +94,7 @@ def get_tag_color(tag: str) -> str:
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def select_papers(papers: List[Dict], target_count: int = 300) -> List[Dict]:
+def select_papers(papers: List[Dict], target_count: int = 200) -> List[Dict]:
     """Select papers according to a mixed strategy:
     - Top 25 papers by interestingness score
     - Bottom 25 papers by interestingness score
@@ -108,14 +108,14 @@ def select_papers(papers: List[Dict], target_count: int = 300) -> List[Dict]:
     papers.sort(key=lambda p: -p["interestingness_score"])
     
     # Select fixed points
-    top_papers = papers[:25]
+    top_papers = papers[:50]
     bottom_papers = papers[-25:]
     
     # Find papers closest to zero
-    zero_papers = sorted(papers[25:-25], key=lambda p: abs(p["interestingness_score"]))[:25]
+    zero_papers = sorted(papers[50:-25], key=lambda p: abs(p["interestingness_score"]))[:25]
     
     # Get remaining papers
-    remaining_papers = [p for p in papers[25:-25] if p not in zero_papers]
+    remaining_papers = [p for p in papers[50:-25] if p not in zero_papers]
     
     # Calculate selection probabilities based on absolute interestingness score
     total_score = sum(abs(p["interestingness_score"]) for p in remaining_papers)
@@ -128,7 +128,7 @@ def select_papers(papers: List[Dict], target_count: int = 300) -> List[Dict]:
     np.random.seed(42)  # For reproducibility
     selected_indices = np.random.choice(
         len(remaining_papers),
-        size=target_count - 75,  # 75 = 25 + 25 + 25
+        size=target_count - 100, # 50 first + 25 last + 25 around zero
         replace=False,
         p=probs
     )
