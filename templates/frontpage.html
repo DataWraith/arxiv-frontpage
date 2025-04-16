@@ -124,6 +124,16 @@
         h1 a {
             text-decoration: underline;
         }
+        .date-section {
+            margin-bottom: 40px;
+        }
+        .date-header {
+            color: #666;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
     </style>
 </head>
 <body>
@@ -143,39 +153,44 @@
         Each tag is weighted according to my preferences to compute a paper's <i>interestingness</i> score.
     </p>
     
-    {% for paper in papers %}
-    <div class="paper">
-        <div class="paper-title">
-            <span class="interestingness-score {% if paper.interestingness_score >= 0 %}interestingness-positive{% else %}interestingness-negative{% endif %}">
-                {{ paper.interestingness_score|abs if paper.interestingness_score == -0.0 else paper.interestingness_score }}
-            </span>
-            <a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">{{ paper.title }}</a>
-            <span class="copy-icon" onclick="event.stopPropagation(); showJson(this.closest('.paper'))">📋</span>
-        </div>
-        <div class="paper-meta">
-            Authors: {{ paper.authors|join(", ") }} | Date: {{ paper.date }}
-        </div>
-        <div class="paper-abstract">
-            <span class="abstract-short">{{ paper.abstract[:300] }}</span>
-            {% if paper.abstract|length > 300 %}
-            <span class="abstract-full" style="display: none;">{{ paper.abstract }}</span>
-            <span class="more-link" onclick="toggleAbstract(this)">... more</span>
-            {% endif %}
-        </div>
-        <div class="paper-tags">
-            {%- for tag, score in paper.tag_scores.items()|sort(attribute='1', reverse=true) -%}
-                {%- if score >= 75 -%}
-                    <span class="tag-badge high-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
-                        {{ tag }}
-                    </span>
-                {%- elif score >= 50 -%}
-                    <span class="tag-badge low-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
-                        {{ tag }}
-                    </span>
-                {%- else -%}<!-- {{ tag }}: {{ score | round(1) }} -->
+    {% for date, papers in papers_by_date.items() %}
+    <div class="date-section">
+        <h2 class="date-header">{{ date }}</h2>
+        {% for paper in papers %}
+        <div class="paper">
+            <div class="paper-title">
+                <span class="interestingness-score {% if paper.interestingness_score >= 0 %}interestingness-positive{% else %}interestingness-negative{% endif %}">
+                    {{ paper.interestingness_score|abs if paper.interestingness_score == -0.0 else paper.interestingness_score }}
+                </span>
+                <a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">{{ paper.title }}</a>
+                <span class="copy-icon" onclick="event.stopPropagation(); showJson(this.closest('.paper'))">📋</span>
+            </div>
+            <div class="paper-meta">
+                Authors: {{ paper.authors|join(", ") }}
+            </div>
+            <div class="paper-abstract">
+                <span class="abstract-short">{{ paper.abstract[:300] }}</span>
+                {% if paper.abstract|length > 300 %}
+                <span class="abstract-full" style="display: none;">{{ paper.abstract }}</span>
+                <span class="more-link" onclick="toggleAbstract(this)">... more</span>
                 {% endif %}
-            {% endfor %}
+            </div>
+            <div class="paper-tags">
+                {%- for tag, score in paper.tag_scores.items()|sort(attribute='1', reverse=true) -%}
+                    {%- if score >= 75 -%}
+                        <span class="tag-badge high-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
+                            {{ tag }}
+                        </span>
+                    {%- elif score >= 50 -%}
+                        <span class="tag-badge low-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
+                            {{ tag }}
+                        </span>
+                    {%- else -%}<!-- {{ tag }}: {{ score | round(1) }} -->
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
+        {% endfor %}
     </div>
     {% endfor %}
     
@@ -192,8 +207,11 @@
             const abstractElement = paperElement.querySelector('.paper-abstract');
             const tagsElement = paperElement.querySelector('.paper-tags');
             
-            const authorsText = metaElement.textContent.split('|')[0].replace('Authors:', '').trim();
-            const dateText = metaElement.textContent.split('|')[1].replace('Date:', '').trim();
+            // Get the date from the parent date-section header
+            const dateSection = paperElement.closest('.date-section');
+            const dateText = dateSection.querySelector('.date-header').textContent.trim();
+            
+            const authorsText = metaElement.textContent.replace('Authors:', '').trim();
             
             const paperData = {
                 title: titleElement.textContent,

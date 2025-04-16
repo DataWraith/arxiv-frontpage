@@ -144,6 +144,20 @@ def select_papers(papers: List[Dict], target_count: int = 200) -> List[Dict]:
     return final_papers
 
 
+def group_papers_by_date(papers: List[Dict]) -> Dict[str, List[Dict]]:
+    """Group papers by their publication date."""
+    grouped_papers = {}
+    for paper in papers:
+        date = paper["date"]
+        if date not in grouped_papers:
+            grouped_papers[date] = []
+        grouped_papers[date].append(paper)
+    
+    # Sort dates in descending order (newest first)
+    sorted_dates = sorted(grouped_papers.keys(), reverse=True)
+    return {date: grouped_papers[date] for date in sorted_dates}
+
+
 def generate_html(
     papers: List[Dict],
     tags: Dict[str, float],
@@ -163,12 +177,15 @@ def generate_html(
 
     # Select papers according to our strategy
     processed_papers = select_papers(processed_papers)
+    
+    # Group papers by date
+    papers_by_date = group_papers_by_date(processed_papers)
 
     env = Environment(loader=FileSystemLoader("templates"))
     template = env.get_template("frontpage.html")
 
     return template.render(
-        papers=processed_papers,
+        papers_by_date=papers_by_date,
         get_tag_color=get_tag_color,
         last_updated=datetime.now().strftime("%Y-%m-%d"),
     )
