@@ -73,6 +73,9 @@
         .interestingness-negative {
             background-color: #f44336;
         }
+        .interestingness-neutral {
+            background-color: #9e9e9e;
+        }
         .last-updated {
             text-align: right;
             color: #666;
@@ -159,7 +162,7 @@
         {% for paper in papers %}
         <div class="paper">
             <div class="paper-title">
-                <span class="interestingness-score {% if paper.interestingness_score >= 0 %}interestingness-positive{% else %}interestingness-negative{% endif %}">
+                <span class="interestingness-score {% if paper.interestingness_score > 0 %}interestingness-positive{% elif paper.interestingness_score < 0 %}interestingness-negative{% else %}interestingness-neutral{% endif %}">
                     {{ paper.interestingness_score|abs if paper.interestingness_score == -0.0 else paper.interestingness_score }}
                 </span>
                 <a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">{{ paper.title }}</a>
