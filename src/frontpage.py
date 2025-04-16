@@ -96,7 +96,7 @@ def get_tag_color(tag: str) -> str:
 
 def select_papers(papers: List[Dict], target_count: int = 200) -> List[Dict]:
     """Select papers according to a mixed strategy:
-    - Top 25 papers by interestingness score
+    - Top 50 papers by interestingness score
     - Bottom 25 papers by interestingness score
     - 25 papers closest to zero interestingness score
     - Remaining papers selected with probability proportional to absolute interestingness score
