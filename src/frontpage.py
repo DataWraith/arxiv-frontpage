@@ -175,10 +175,7 @@ def generate_html(
         for paper in tqdm(papers, desc="Calculating scores")
     ]
 
-    # Select papers according to our strategy
     processed_papers = select_papers(processed_papers)
-    
-    # Group papers by date
     papers_by_date = group_papers_by_date(processed_papers)
 
     env = Environment(loader=FileSystemLoader("templates"))
