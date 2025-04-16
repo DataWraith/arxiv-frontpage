@@ -120,10 +120,7 @@ def select_papers(papers: List[Dict], target_count: int = 200) -> List[Dict]:
     
     # Calculate selection probabilities based on absolute interestingness score
     total_score = sum(abs(p["interestingness_score"]) for p in remaining_papers)
-    if total_score > 0:
-        probs = [abs(p["interestingness_score"]) / total_score for p in remaining_papers]
-    else:
-        probs = [1.0 / len(remaining_papers) for _ in remaining_papers]
+    probs = [abs(p["interestingness_score"]) / total_score for p in remaining_papers]
     
     # Select remaining papers
     np.random.seed(42)  # For reproducibility
