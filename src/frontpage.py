@@ -59,7 +59,7 @@ def process_paper_scores(
 
     interestingness = 0.0
     for tag, score in paper["tag_scores"].items():
-        if score >= 10:
+        if score >= 5:
             interestingness += score * tags[tag]
     interestingness /= max(1, len(paper["tag_scores"]))
 
