@@ -31,6 +31,7 @@
     "RAG": -0.1,
     "Reinforcement Learning": 1.5,
     "Robotics": -1.0,
+    "Skillrating": 10.0,
     "SpikingNN": -3.0,
     "T2I": 0.2
 } 
