@@ -184,7 +184,7 @@
                         <span class="tag-badge high-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
                             {{ tag }}
                         </span>
-                    {%- elif score >= 50 -%}
+                    {%- elif score >= 5 -%}
                         <span class="tag-badge low-confidence" style="background-color: {{ get_tag_color(tag) }}" title="Confidence: {{ score|round(1) }}%">
                             {{ tag }}
                         </span>
